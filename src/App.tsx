@@ -6,23 +6,32 @@ import {
   generateCelestialEvents,
   getEventsByTimeframe,
 } from '@/lib/celestial'
+import { findNearbyViewingSpots, ViewingSpot } from '@/lib/lightPollution'
 import { LocationHeader } from '@/components/LocationHeader'
 import { EventCard } from '@/components/EventCard'
 import { EventDetailDialog } from '@/components/EventDetailDialog'
+import { ViewingSpotCard } from '@/components/ViewingSpotCard'
+import { ViewingSpotDialog } from '@/components/ViewingSpotDialog'
+import { LightPollutionMap } from '@/components/LightPollutionMap'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Info, MoonStars } from '@phosphor-icons/react'
+import { Button } from '@/components/ui/button'
+import { Info, MoonStars, MapTrifold, Sparkle } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { motion } from 'framer-motion'
 
 function App() {
   const [location, setLocation] = useKV<UserLocation | null>('user-location', null)
   const [events, setEvents] = useKV<CelestialEvent[]>('celestial-events', [])
+  const [viewingSpots, setViewingSpots] = useKV<ViewingSpot[]>('viewing-spots', [])
   const [selectedEvent, setSelectedEvent] = useState<CelestialEvent | null>(null)
+  const [selectedSpot, setSelectedSpot] = useState<ViewingSpot | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [isLoadingSpots, setIsLoadingSpots] = useState(false)
   const [activeTab, setActiveTab] = useState<'tonight' | 'week' | 'month'>('tonight')
   const [locationRequested, setLocationRequested] = useState(false)
+  const [showMap, setShowMap] = useState(false)
 
   useEffect(() => {
     if (!location && !locationRequested) {
@@ -64,12 +73,37 @@ function App() {
     }
   }
 
+  const loadViewingSpots = async (userLocation: UserLocation) => {
+    setIsLoadingSpots(true)
+    try {
+      const spots = await findNearbyViewingSpots(userLocation)
+      setViewingSpots(() => spots)
+      toast.success(`Found ${spots.length} viewing spots nearby`)
+    } catch (error) {
+      console.error('Error loading viewing spots:', error)
+      toast.error('Error finding viewing spots')
+    } finally {
+      setIsLoadingSpots(false)
+    }
+  }
+
   const handleRefresh = async () => {
     if (!location) {
       await requestLocation()
     } else {
       await loadEvents(location)
     }
+  }
+
+  const handleLoadViewingSpots = async () => {
+    if (!location) {
+      toast.error('Location required to find viewing spots')
+      return
+    }
+    if ((viewingSpots || []).length === 0) {
+      await loadViewingSpots(location)
+    }
+    setShowMap(true)
   }
 
   const filteredEvents = getEventsByTimeframe(events || [], activeTab)
@@ -102,6 +136,25 @@ function App() {
           isLoading={isLoading}
         />
 
+        {location && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="mb-6"
+          >
+            <Button
+              onClick={handleLoadViewingSpots}
+              variant="outline"
+              className="w-full sm:w-auto bg-gradient-to-r from-accent/10 to-secondary/10 border-accent/30 hover:border-accent/50 hover:bg-accent/20"
+            >
+              <MapTrifold size={18} />
+              {showMap ? 'Viewing Map Loaded' : 'Find Best Viewing Spots'}
+              <Sparkle size={16} />
+            </Button>
+          </motion.div>
+        )}
+
         {!location && !isLoading && (
           <Alert className="mb-8 border-accent/50 bg-accent/10">
             <Info size={18} />
@@ -110,6 +163,54 @@ function App() {
               location to calculate which astronomical phenomena are visible from your position.
             </AlertDescription>
           </Alert>
+        )}
+
+        {showMap && location && (viewingSpots || []).length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="mb-8 space-y-6"
+          >
+            <div>
+              <h2 className="text-2xl font-bold mb-2 flex items-center gap-2">
+                <MapTrifold size={28} className="text-accent" />
+                Light Pollution Map
+              </h2>
+              <p className="text-muted-foreground mb-4">
+                Find the darkest skies near you for the best stargazing experience
+              </p>
+            </div>
+
+            {isLoadingSpots ? (
+              <Skeleton className="h-96 w-full bg-card/50" />
+            ) : (
+              <>
+                <LightPollutionMap
+                  userLocation={location}
+                  viewingSpots={viewingSpots || []}
+                  selectedSpot={selectedSpot}
+                  onSpotClick={setSelectedSpot}
+                />
+
+                <div>
+                  <h3 className="text-lg font-semibold mb-4">Recommended Viewing Spots</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {(viewingSpots || [])
+                      .sort((a, b) => a.bortle - b.bortle)
+                      .map((spot) => (
+                        <ViewingSpotCard
+                          key={spot.id}
+                          spot={spot}
+                          onClick={() => setSelectedSpot(spot)}
+                          userLocation={location}
+                        />
+                      ))}
+                  </div>
+                </div>
+              </>
+            )}
+          </motion.div>
         )}
 
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} className="space-y-6">
@@ -173,6 +274,12 @@ function App() {
         event={selectedEvent}
         open={!!selectedEvent}
         onOpenChange={(open) => !open && setSelectedEvent(null)}
+      />
+
+      <ViewingSpotDialog
+        spot={selectedSpot}
+        open={!!selectedSpot}
+        onOpenChange={(open) => !open && setSelectedSpot(null)}
       />
     </div>
   )

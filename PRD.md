@@ -47,6 +47,13 @@ This app combines real-time location data, API integration for celestial events,
 - **Progression**: Compare current time to event windows → Calculate "visible now" vs "visible in X hours" → Update UI indicators
 - **Success criteria**: Status accurately reflects real-time visibility with helpful countdowns
 
+### Light Pollution Map & Viewing Spots
+- **Functionality**: Interactive map showing nearby locations with light pollution levels and recommended stargazing spots
+- **Purpose**: Helps users find the best locations for viewing celestial events with minimal light interference
+- **Trigger**: User clicks "Find Best Viewing Spots" button
+- **Progression**: Location detected → Generate nearby viewing spots → Display interactive map with Bortle scale ratings → Show spot details with directions
+- **Success criteria**: Map displays accurate light pollution zones, spots are realistically located nearby with useful information and navigation
+
 ## Edge Case Handling
 
 - **Location Permission Denied**: Show manual location entry option with city search or lat/lng input
@@ -54,7 +61,8 @@ This app combines real-time location data, API integration for celestial events,
 - **Poor Viewing Conditions**: Show weather/light pollution warnings when relevant
 - **API Unavailable**: Graceful fallback with cached data or educational content about general celestial phenomena
 - **Southern Hemisphere Users**: Ensure event data and descriptions work correctly for all latitudes
-- **Urban Light Pollution**: Adjust recommendations based on typical urban viewing limitations
+- **Urban Light Pollution**: Adjust recommendations based on typical urban viewing limitations; suggest darker viewing spots
+- **No Viewing Spots Found**: Show fallback suggestions or general advice about finding dark sky locations
 
 ## Design Direction
 
@@ -97,21 +105,24 @@ Animations should evoke the slow, graceful movement of celestial bodies - nothin
 ## Component Selection
 
 - **Components**:
-  - **Card**: Primary container for each celestial event, using gradient backgrounds suggesting depth
-  - **Dialog**: For detailed event information and educational content
-  - **Badge**: For event categories (meteor shower, planet, aurora, etc.) and visibility status
+  - **Card**: Primary container for each celestial event and viewing spot, using gradient backgrounds suggesting depth
+  - **Dialog**: For detailed event information, viewing spot details, and educational content
+  - **Badge**: For event categories (meteor shower, planet, aurora, etc.), visibility status, and Bortle scale ratings
   - **Tabs**: To switch between "Tonight", "This Week", "This Month" views
   - **Progress**: For countdown timers to upcoming events
   - **ScrollArea**: For long educational content within dialogs
   - **Skeleton**: For loading states while fetching API data
-  - **Button**: For refresh, location settings, and "Learn More" actions
+  - **Button**: For refresh, location settings, viewing spots, and "Learn More" actions
   - **Alert**: For location permission requests and viewing condition warnings
+  - **Canvas**: For rendering the interactive light pollution map with color-coded zones
 
 - **Customizations**:
   - **Event Cards**: Custom gradient overlays on Cards with glassmorphism effects (backdrop-blur, semi-transparent)
   - **Sky Background**: Custom gradient background using mesh gradients with multiple radial gradients creating a deep space atmosphere
   - **Visibility Indicator**: Custom animated badge showing pulse effect for "visible now" events
   - **Location Header**: Custom component showing coordinates with star icon and edit capability
+  - **Light Pollution Map**: Custom canvas-based visualization showing Bortle scale zones with interactive viewing spot markers
+  - **Viewing Spot Cards**: Compact cards with ratings, distance, and light pollution information
 
 - **States**:
   - Buttons: Default has subtle glow, hover adds elevation with box-shadow and slight scale, active state dims glow
@@ -119,14 +130,17 @@ Animations should evoke the slow, graceful movement of celestial bodies - nothin
   - Badges: "Visible Now" pulses gently, upcoming events have static styling, past events are muted
 
 - **Icon Selection**:
-  - Telescope (MagnifyingGlass for search/explore)
-  - MapPin for location
+  - Telescope/MagnifyingGlass for search/explore
+  - MapPin for location and viewing spots
+  - MapTrifold for light pollution map feature
   - Clock for timing information
-  - Star for favoriting/highlighting special events
+  - Star for ratings and highlighting special events
   - CalendarBlank for upcoming events
   - Moon/MoonStars for night sky content
   - Sparkle for special/rare events
   - Info for educational content
+  - NavigationArrow for directions to viewing spots
+  - Path for distance/accessibility indicators
 
 - **Spacing**:
   - Container padding: p-6 on desktop, p-4 on mobile
