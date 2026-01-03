@@ -54,6 +54,13 @@ This app combines real-time location data, API integration for celestial events,
 - **Progression**: Location detected → Generate nearby viewing spots → Display interactive map with Bortle scale ratings → Show spot details with directions
 - **Success criteria**: Map displays accurate light pollution zones, spots are realistically located nearby with useful information and navigation
 
+### Constellation Guide & Interactive Star Maps
+- **Functionality**: Browse visible constellations with interactive star maps showing stars, constellation lines, and deep sky objects
+- **Purpose**: Helps users identify and learn about constellations visible from their location
+- **Trigger**: User switches to "Constellations" tab
+- **Progression**: Show constellations visible this month → User selects constellation → Display interactive star map → Click stars and objects for details → Learn mythology and viewing tips
+- **Success criteria**: Star maps are accurate and interactive, clicking reveals detailed information, constellations filtered by hemisphere and season
+
 ## Edge Case Handling
 
 - **Location Permission Denied**: Show manual location entry option with city search or lat/lng input
@@ -64,6 +71,8 @@ This app combines real-time location data, API integration for celestial events,
 - **Urban Light Pollution**: Adjust recommendations based on typical urban viewing limitations; suggest darker viewing spots
 - **No Viewing Spots Found**: Show fallback suggestions or general advice about finding dark sky locations
 - **API Rate Limits**: NASA DEMO_KEY has rate limits; handle gracefully with cached data and retry logic
+- **No Visible Constellations**: Show message when no constellations match current month/location filters
+- **Star Map Interaction**: Ensure touch targets are large enough on mobile for clicking individual stars and objects
 
 ## Design Direction
 
@@ -106,16 +115,16 @@ Animations should evoke the slow, graceful movement of celestial bodies - nothin
 ## Component Selection
 
 - **Components**:
-  - **Card**: Primary container for each celestial event and viewing spot, using gradient backgrounds suggesting depth
-  - **Dialog**: For detailed event information, viewing spot details, and educational content
-  - **Badge**: For event categories (meteor shower, planet, aurora, etc.), visibility status, and Bortle scale ratings
-  - **Tabs**: To switch between "Tonight", "This Week", "This Month" views
+  - **Card**: Primary container for each celestial event, viewing spot, and constellation, using gradient backgrounds suggesting depth
+  - **Dialog**: For detailed event information, viewing spot details, constellation details, and educational content
+  - **Badge**: For event categories (meteor shower, planet, aurora, etc.), visibility status, constellation difficulty, and Bortle scale ratings
+  - **Tabs**: To switch between "Tonight", "This Week", "This Month" views and "Events" vs "Constellations" main views
   - **Progress**: For countdown timers to upcoming events
   - **ScrollArea**: For long educational content within dialogs
   - **Skeleton**: For loading states while fetching API data
   - **Button**: For refresh, location settings, viewing spots, and "Learn More" actions
   - **Alert**: For location permission requests and viewing condition warnings
-  - **Canvas**: For rendering the interactive light pollution map with color-coded zones
+  - **Canvas**: For rendering the interactive light pollution map with color-coded zones and interactive star maps with constellation patterns
 
 - **Customizations**:
   - **Event Cards**: Custom gradient overlays on Cards with glassmorphism effects (backdrop-blur, semi-transparent)
@@ -124,6 +133,8 @@ Animations should evoke the slow, graceful movement of celestial bodies - nothin
   - **Location Header**: Custom component showing coordinates with star icon and edit capability
   - **Light Pollution Map**: Custom canvas-based visualization showing Bortle scale zones with interactive viewing spot markers
   - **Viewing Spot Cards**: Compact cards with ratings, distance, and light pollution information
+  - **Star Map**: Interactive canvas-based constellation visualization with clickable stars, constellation lines, and deep sky objects
+  - **Constellation Cards**: Cards showing difficulty, hemisphere, and best viewing months
 
 - **States**:
   - Buttons: Default has subtle glow, hover adds elevation with box-shadow and slight scale, active state dims glow
@@ -135,13 +146,16 @@ Animations should evoke the slow, graceful movement of celestial bodies - nothin
   - MapPin for location and viewing spots
   - MapTrifold for light pollution map feature
   - Clock for timing information
-  - Star for ratings and highlighting special events
+  - Star for ratings, highlighting special events, and constellations
   - CalendarBlank for upcoming events
   - Moon/MoonStars for night sky content
-  - Sparkle for special/rare events
+  - Sparkle for special/rare events and deep sky objects
   - Info for educational content
   - NavigationArrow for directions to viewing spots
   - Path for distance/accessibility indicators
+  - Eye for visibility and observation
+  - Binoculars for telescope/equipment requirements
+  - Book for mythology and educational content
 
 - **Spacing**:
   - Container padding: p-6 on desktop, p-4 on mobile
