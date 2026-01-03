@@ -68,6 +68,13 @@ This app combines real-time location data, API integration for celestial events,
 - **Progression**: User requests compass access → Device permission granted → Real-time heading displayed → User points device at sky → Compass shows cardinal direction and degree heading → User references constellation directions
 - **Success criteria**: Compass accurately reflects device orientation, smoothly updates heading, provides calibration feedback, integrates with constellation finding guides
 
+### Augmented Reality Constellation View
+- **Functionality**: Overlays constellation patterns and star positions directly on the device camera feed using real-time device orientation and compass data
+- **Purpose**: Allows users to point their device at the sky and instantly identify constellations in their field of view with visual overlays
+- **Trigger**: User clicks "Launch AR Sky View" button (available when location detected and constellations are visible)
+- **Progression**: User launches AR → Request camera permission → Access device orientation & compass → Display live camera feed → Calculate visible constellations based on heading/tilt → Render constellation lines and stars on canvas overlay → User pans device to discover constellations → Tap constellation for details
+- **Success criteria**: Camera feed displays smoothly, constellations accurately positioned based on device orientation, smooth overlay rendering, touch interactions reveal constellation information, constellations only shown when in device's field of view
+
 ## Edge Case Handling
 
 - **Location Permission Denied**: Show manual location entry option with city search or lat/lng input
@@ -84,6 +91,10 @@ This app combines real-time location data, API integration for celestial events,
 - **Compass Permission Denied**: Provide clear instructions on enabling device orientation in browser settings
 - **Compass Calibration**: Display calibration prompt when device motion suggests inaccurate readings
 - **Low Compass Accuracy**: Warn users when compass accuracy is low (iOS-specific feature)
+- **Camera Permission Denied**: Show helpful message with instructions when AR view cannot access camera
+- **AR on Desktop**: Gracefully handle AR requests on desktop browsers without camera, suggest mobile device
+- **No Constellations in View**: Display helpful message when user points device at empty sky region in AR
+- **AR Performance**: Optimize canvas rendering for smooth 30+ FPS on mobile devices, throttle updates if needed
 
 ## Design Direction
 
@@ -136,6 +147,7 @@ Animations should evoke the slow, graceful movement of celestial bodies - nothin
   - **Button**: For refresh, location settings, viewing spots, and "Learn More" actions
   - **Alert**: For location permission requests and viewing condition warnings
   - **Canvas**: For rendering the interactive light pollution map with color-coded zones and interactive star maps with constellation patterns
+  - **Video**: For displaying live camera feed in AR view with full-screen coverage
 
 - **Customizations**:
   - **Event Cards**: Custom gradient overlays on Cards with glassmorphism effects (backdrop-blur, semi-transparent)
@@ -147,12 +159,14 @@ Animations should evoke the slow, graceful movement of celestial bodies - nothin
   - **Star Map**: Interactive canvas-based constellation visualization with clickable stars, constellation lines, and deep sky objects
   - **Constellation Cards**: Cards showing difficulty, hemisphere, and best viewing months
   - **Compass**: Custom animated compass rose with real-time heading display, cardinal directions, smooth rotation animations, and calibration indicators
+  - **AR View**: Full-screen camera feed with transparent canvas overlay for constellation rendering, heads-up display with orientation info, interactive constellation selection by tapping overlays, real-time position tracking with smooth animations
 
 - **States**:
   - Buttons: Default has subtle glow, hover adds elevation with box-shadow and slight scale, active state dims glow
   - Event Cards: Default has soft border, hover elevates with stronger glow and scale transform, selected/active has bright accent border
   - Badges: "Visible Now" pulses gently, upcoming events have static styling, past events are muted
   - Compass: Inactive shows static rose with enable button, active shows smooth rotating cardinal directions with spring physics, calibrating displays overlay with rotation animation, low accuracy shows warning badge
+  - AR View: Inactive shows camera feed only, active overlays constellation patterns with glow effects, selected constellation highlights with brighter accent color and thicker lines, info panels slide in/out smoothly
 
 - **Icon Selection**:
   - Telescope/MagnifyingGlass for search/explore
@@ -171,6 +185,9 @@ Animations should evoke the slow, graceful movement of celestial bodies - nothin
   - Binoculars for telescope/equipment requirements
   - Book for mythology and educational content
   - Warning for calibration alerts and accuracy warnings
+  - Camera for AR view activation
+  - Crosshair/Target for AR reticle and constellation targeting
+  - Circle for AR center point and field of view indicator
 
 - **Spacing**:
   - Container padding: p-6 on desktop, p-4 on mobile
@@ -186,3 +203,6 @@ Animations should evoke the slow, graceful movement of celestial bodies - nothin
   - Detail dialogs become full-screen sheets on mobile using Drawer component
   - Reduce font sizes: H1 to 24px, H2 to 20px, Body to 14px on mobile
   - Increase touch targets to minimum 44px for all interactive elements
+  - AR view optimized for mobile devices with portrait/landscape support
+  - AR constellation overlays scale appropriately for different screen sizes
+  - AR info panels positioned to avoid obstructing camera view on small screens

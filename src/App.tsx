@@ -17,11 +17,12 @@ import { LightPollutionMap } from '@/components/LightPollutionMap'
 import { ConstellationCard } from '@/components/ConstellationCard'
 import { ConstellationDialog } from '@/components/ConstellationDialog'
 import { Compass } from '@/components/Compass'
+import { ARView } from '@/components/ARView'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
-import { Info, MoonStars, MapTrifold, Sparkle, Star, Compass as CompassIcon } from '@phosphor-icons/react'
+import { Info, MoonStars, MapTrifold, Sparkle, Star, Compass as CompassIcon, Camera } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { motion } from 'framer-motion'
 
@@ -38,6 +39,7 @@ function App() {
   const [mainView, setMainView] = useState<'events' | 'constellations' | 'compass'>('events')
   const [locationRequested, setLocationRequested] = useState(false)
   const [showMap, setShowMap] = useState(false)
+  const [showARView, setShowARView] = useState(false)
 
   useEffect(() => {
     if (!location && !locationRequested) {
@@ -120,6 +122,16 @@ function App() {
 
   const visibleConstellations = location ? getVisibleConstellations(location) : []
 
+  if (showARView) {
+    return (
+      <ARView
+        constellations={visibleConstellations}
+        onClose={() => setShowARView(false)}
+        onConstellationClick={setSelectedConstellation}
+      />
+    )
+  }
+
   return (
     <div className="min-h-screen relative overflow-hidden">
       <div className="fixed inset-0 -z-10 bg-background">
@@ -144,22 +156,43 @@ function App() {
           isLoading={isLoading}
         />
 
-        <Tabs value={mainView} onValueChange={(v) => setMainView(v as typeof mainView)} className="mb-6">
-          <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-3 bg-card/50 backdrop-blur-sm border border-border/50">
-            <TabsTrigger value="events" className="data-[state=active]:bg-accent/20 data-[state=active]:text-accent">
-              <MoonStars size={18} />
-              Events
-            </TabsTrigger>
-            <TabsTrigger value="constellations" className="data-[state=active]:bg-accent/20 data-[state=active]:text-accent">
-              <Star size={18} />
-              Constellations
-            </TabsTrigger>
-            <TabsTrigger value="compass" className="data-[state=active]:bg-accent/20 data-[state=active]:text-accent">
-              <CompassIcon size={18} />
-              Compass
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <div className="space-y-4 mb-6">
+          {location && visibleConstellations.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="flex justify-center"
+            >
+              <Button
+                onClick={() => setShowARView(true)}
+                size="lg"
+                className="bg-gradient-to-r from-accent to-secondary hover:from-accent/90 hover:to-secondary/90 text-accent-foreground shadow-lg shadow-accent/20"
+              >
+                <Camera size={20} weight="fill" />
+                Launch AR Sky View
+                <Sparkle size={16} />
+              </Button>
+            </motion.div>
+          )}
+
+          <Tabs value={mainView} onValueChange={(v) => setMainView(v as typeof mainView)}>
+            <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-3 bg-card/50 backdrop-blur-sm border border-border/50">
+              <TabsTrigger value="events" className="data-[state=active]:bg-accent/20 data-[state=active]:text-accent">
+                <MoonStars size={18} />
+                Events
+              </TabsTrigger>
+              <TabsTrigger value="constellations" className="data-[state=active]:bg-accent/20 data-[state=active]:text-accent">
+                <Star size={18} />
+                Constellations
+              </TabsTrigger>
+              <TabsTrigger value="compass" className="data-[state=active]:bg-accent/20 data-[state=active]:text-accent">
+                <CompassIcon size={18} />
+                Compass
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
 
         {mainView === 'events' && (
           <>
@@ -315,6 +348,17 @@ function App() {
                   ? `Explore constellations visible from your location this month`
                   : 'Enable location to see constellations visible in your area'}
               </p>
+              {location && visibleConstellations.length > 0 && (
+                <Button
+                  onClick={() => setShowARView(true)}
+                  variant="outline"
+                  className="bg-gradient-to-r from-accent/10 to-secondary/10 border-accent/30 hover:border-accent/50 hover:bg-accent/20"
+                >
+                  <Camera size={18} />
+                  View in AR
+                  <Sparkle size={16} />
+                </Button>
+              )}
             </div>
 
             {!location && !isLoading && (
@@ -379,6 +423,17 @@ function App() {
               <p className="text-muted-foreground mb-4">
                 Use your device's compass to find the direction of celestial objects and constellations in real-time.
               </p>
+              {location && visibleConstellations.length > 0 && (
+                <Button
+                  onClick={() => setShowARView(true)}
+                  variant="outline"
+                  className="bg-gradient-to-r from-accent/10 to-secondary/10 border-accent/30 hover:border-accent/50 hover:bg-accent/20 mb-4"
+                >
+                  <Camera size={18} />
+                  Switch to AR View
+                  <Sparkle size={16} />
+                </Button>
+              )}
             </div>
 
             <Compass />
