@@ -18,11 +18,12 @@ import { ConstellationCard } from '@/components/ConstellationCard'
 import { ConstellationDialog } from '@/components/ConstellationDialog'
 import { Compass } from '@/components/Compass'
 import { ARView } from '@/components/ARView'
+import { AuroraDashboard } from '@/components/AuroraDashboard'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
-import { Info, MoonStars, MapTrifold, Sparkle, Star, Compass as CompassIcon, Camera } from '@phosphor-icons/react'
+import { Info, MoonStars, MapTrifold, Sparkle, Star, Compass as CompassIcon, Camera, CloudMoon } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { motion } from 'framer-motion'
 
@@ -36,7 +37,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(false)
   const [isLoadingSpots, setIsLoadingSpots] = useState(false)
   const [activeTab, setActiveTab] = useState<'tonight' | 'week' | 'month'>('tonight')
-  const [mainView, setMainView] = useState<'events' | 'constellations' | 'compass'>('events')
+  const [mainView, setMainView] = useState<'events' | 'constellations' | 'compass' | 'aurora'>('events')
   const [locationRequested, setLocationRequested] = useState(false)
   const [showMap, setShowMap] = useState(false)
   const [showARView, setShowARView] = useState(false)
@@ -177,7 +178,7 @@ function App() {
           )}
 
           <Tabs value={mainView} onValueChange={(v) => setMainView(v as typeof mainView)}>
-            <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-3 bg-card/50 backdrop-blur-sm border border-border/50">
+            <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-4 bg-card/50 backdrop-blur-sm border border-border/50">
               <TabsTrigger value="events" className="data-[state=active]:bg-accent/20 data-[state=active]:text-accent">
                 <MoonStars size={18} />
                 Events
@@ -185,6 +186,10 @@ function App() {
               <TabsTrigger value="constellations" className="data-[state=active]:bg-accent/20 data-[state=active]:text-accent">
                 <Star size={18} />
                 Constellations
+              </TabsTrigger>
+              <TabsTrigger value="aurora" className="data-[state=active]:bg-accent/20 data-[state=active]:text-accent">
+                <CloudMoon size={18} />
+                Aurora
               </TabsTrigger>
               <TabsTrigger value="compass" className="data-[state=active]:bg-accent/20 data-[state=active]:text-accent">
                 <CompassIcon size={18} />
@@ -463,6 +468,16 @@ function App() {
                 </div>
               </div>
             )}
+          </motion.div>
+        )}
+
+        {mainView === 'aurora' && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <AuroraDashboard location={location || null} />
           </motion.div>
         )}
       </div>

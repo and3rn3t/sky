@@ -75,6 +75,13 @@ This app combines real-time location data, API integration for celestial events,
 - **Progression**: User launches AR → Request camera permission → Access device orientation & compass → Display live camera feed → Calculate visible constellations based on heading/tilt → Render constellation lines and stars on canvas overlay → User pans device to discover constellations → Tap constellation for details → Click "Capture" to save photo with AR overlays
 - **Success criteria**: Camera feed displays smoothly, constellations accurately positioned based on device orientation, smooth overlay rendering, touch interactions reveal constellation information, constellations only shown when in device's field of view, photo capture combines video feed and overlay canvas with timestamp watermark and downloads automatically
 
+### Northern Lights (Aurora) Tracking Dashboard
+- **Functionality**: Real-time aurora borealis forecast using NOAA Space Weather Prediction Center data, showing current Kp index, 3-day hourly forecasts, solar activity metrics, and location-specific viewing advice
+- **Purpose**: Helps users determine the best times to view the aurora from their location, understand solar conditions affecting aurora visibility, and plan aurora viewing trips
+- **Trigger**: User switches to "Aurora" tab in main navigation
+- **Progression**: Location detected → Fetch NOAA Kp index data → Fetch solar wind and CME data → Calculate viewing probabilities based on latitude → Generate hourly forecasts → Display current conditions, tonight's forecast, and 3-day outlook → Show solar activity metrics → Recommend best viewing times
+- **Success criteria**: Real-time Kp index displays accurately from NOAA API, forecast shows hourly predictions with viewing quality ratings (poor/fair/good/excellent), solar activity data updates (solar flares, CMEs, solar wind speed), location-specific advice accounts for user's latitude, best viewing time recommendations based on both Kp forecast and optimal viewing hours (10PM-2AM), viewable latitude bands calculated correctly for each Kp level
+
 ## Edge Case Handling
 
 - **Location Permission Denied**: Show manual location entry option with city search or lat/lng input
@@ -97,6 +104,9 @@ This app combines real-time location data, API integration for celestial events,
 - **AR Performance**: Optimize canvas rendering for smooth 30+ FPS on mobile devices, throttle updates if needed
 - **Photo Capture Failure**: Handle canvas capture errors gracefully with toast notification, ensure capture canvas initialized
 - **Low Storage**: Browser may block download if device storage full; show appropriate error message
+- **NOAA API Unavailable**: Show fallback aurora forecast based on typical Kp patterns when NOAA space weather APIs are unreachable
+- **Low Latitude Locations**: Provide realistic aurora viewing advice for users far from polar regions, explain Kp thresholds needed
+- **Aurora Data Staleness**: Display last update timestamp, allow manual refresh, warn if data is more than 1 hour old
 
 ## Design Direction
 
@@ -163,6 +173,9 @@ Animations should evoke the slow, graceful movement of celestial bodies - nothin
   - **Compass**: Custom animated compass rose with real-time heading display, cardinal directions, smooth rotation animations, and calibration indicators
   - **AR View**: Full-screen camera feed with transparent canvas overlay for constellation rendering, heads-up display with orientation info, interactive constellation selection by tapping overlays, real-time position tracking with smooth animations, photo capture button with success animation
   - **Photo Capture Overlay**: Animated preview flash and success badge when photo captured, watermark with app branding and timestamp on saved images
+  - **Aurora Dashboard**: Multi-metric display with Kp index gauge, solar activity counters, and hourly forecast timeline with gradient quality indicators
+  - **Kp Index Gauge**: Progress bar visualization showing current Kp on 0-9 scale with color-coded severity levels
+  - **Aurora Forecast Cards**: Timeline cards showing hourly predictions with probability percentages, quality badges, and Kp values
 
 - **States**:
   - Buttons: Default has subtle glow, hover adds elevation with box-shadow and slight scale, active state dims glow
@@ -172,6 +185,9 @@ Animations should evoke the slow, graceful movement of celestial bodies - nothin
   - AR View: Inactive shows camera feed only, active overlays constellation patterns with glow effects, selected constellation highlights with brighter accent color and thicker lines, info panels slide in/out smoothly
   - Capture Button: Default state with camera icon, disabled during capture with loading text, success state briefly shows checkmark, hover state with accent glow and scale
   - Photo Preview: Fades in with scale animation when captured, displays for 3 seconds with success badge, fades out gracefully
+  - Aurora Forecast Cards: Default shows time and metrics, hover elevates slightly with accent glow, high Kp events (7+) have destructive red accent, good viewing quality shows accent highlight
+  - Kp Gauge: Animates on load filling to current value, color transitions from muted (low) to accent (moderate) to destructive (high)
+  - Refresh Button: Default state with icon, loading state shows spinning animation, success briefly shows checkmark
 
 - **Icon Selection**:
   - Telescope/MagnifyingGlass for search/explore
@@ -182,6 +198,7 @@ Animations should evoke the slow, graceful movement of celestial bodies - nothin
   - Star for ratings, highlighting special events, and constellations
   - CalendarBlank for upcoming events
   - Moon/MoonStars for night sky content
+  - CloudMoon for aurora/northern lights section
   - Sparkle for special/rare events and deep sky objects
   - Info for educational content
   - NavigationArrow for directions to viewing spots
@@ -195,6 +212,11 @@ Animations should evoke the slow, graceful movement of celestial bodies - nothin
   - Images for photo gallery or capture preview
   - Crosshair/Target for AR reticle and constellation targeting
   - Circle for AR center point and field of view indicator
+  - Sun for solar activity and space weather data
+  - Lightning for solar flares and geomagnetic storms
+  - Wind for solar wind speed metrics
+  - Gauge for Kp index and activity levels
+  - ArrowsClockwise for refresh/update actions
 
 - **Spacing**:
   - Container padding: p-6 on desktop, p-4 on mobile
@@ -213,3 +235,7 @@ Animations should evoke the slow, graceful movement of celestial bodies - nothin
   - AR view optimized for mobile devices with portrait/landscape support
   - AR constellation overlays scale appropriately for different screen sizes
   - AR info panels positioned to avoid obstructing camera view on small screens
+  - Aurora dashboard metrics stack vertically on mobile instead of 3-column grid
+  - Aurora forecast cards show condensed time format on mobile
+  - Solar activity metrics use single column layout on mobile
+  - Tab navigation for "Tonight" vs "3-Day Forecast" remains horizontal but condensed
