@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
 import { UserLocation } from '@/lib/types'
 import { AuroraData, fetchAuroraData, getAuroraViewingAdvice } from '@/lib/auroraApi'
+import { useKpAlertMonitor } from '@/hooks/use-kp-alert'
+import { NotificationSettings } from '@/components/NotificationSettings'
+import { AlertHistory } from '@/components/AlertHistory'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -31,6 +34,8 @@ export function AuroraDashboard({ location }: AuroraDashboardProps) {
   const [auroraData, setAuroraData] = useState<AuroraData | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null)
+
+  useKpAlertMonitor(auroraData?.currentKp || null, location)
 
   useEffect(() => {
     if (location) {
@@ -149,6 +154,10 @@ export function AuroraDashboard({ location }: AuroraDashboardProps) {
           Refresh
         </Button>
       </div>
+
+      <NotificationSettings location={location} />
+
+      <AlertHistory />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
