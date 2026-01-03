@@ -13,9 +13,13 @@ import {
   Eye,
   Crosshair,
   Star,
-  Circle
+  Circle,
+  Camera,
+  Download,
+  Images
 } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
+import { toast } from 'sonner'
 
 interface ARViewProps {
   constellations: Constellation[]
@@ -71,6 +75,7 @@ const getAngleDifference = (angle1: number, angle2: number): number => {
 export function ARView({ constellations, onClose, onConstellationClick }: ARViewProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const captureCanvasRef = useRef<HTMLCanvasElement>(null)
   const [stream, setStream] = useState<MediaStream | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [deviceOrientation, setDeviceOrientation] = useState({ alpha: 0, beta: 0, gamma: 0 })
@@ -78,6 +83,8 @@ export function ARView({ constellations, onClose, onConstellationClick }: ARView
   const { compassData, startCompass, stopCompass, isActive, permissionState } = useCompass()
   const [constellationPositions, setConstellationPositions] = useState<ConstellationPosition[]>([])
   const [selectedConstellation, setSelectedConstellation] = useState<Constellation | null>(null)
+  const [isCapturing, setIsCapturing] = useState(false)
+  const [capturedImage, setCapturedImage] = useState<string | null>(null)
 
   useEffect(() => {
     const initCamera = async () => {
@@ -295,6 +302,66 @@ export function ARView({ constellations, onClose, onConstellationClick }: ARView
     setSelectedConstellation(null)
   }
 
+  const capturePhoto = async () => {
+    if (!videoRef.current || !canvasRef.current || !captureCanvasRef.current) return
+
+    setIsCapturing(true)
+
+    try {
+      const captureCanvas = captureCanvasRef.current
+      const video = videoRef.current
+      const overlayCanvas = canvasRef.current
+      const ctx = captureCanvas.getContext('2d')
+      
+      if (!ctx) {
+        throw new Error('Could not get canvas context')
+      }
+
+      captureCanvas.width = video.videoWidth || 1920
+      captureCanvas.height = video.videoHeight || 1080
+
+      ctx.drawImage(video, 0, 0, captureCanvas.width, captureCanvas.height)
+      ctx.drawImage(overlayCanvas, 0, 0, captureCanvas.width, captureCanvas.height)
+
+      const timestamp = new Date().toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+      })
+
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.7)'
+      ctx.fillRect(20, captureCanvas.height - 80, 400, 60)
+      
+      ctx.fillStyle = '#5BFFC1'
+      ctx.font = 'bold 20px Space Grotesk'
+      ctx.fillText('Night Sky Tonight - AR View', 30, captureCanvas.height - 50)
+      
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)'
+      ctx.font = '14px Inter'
+      ctx.fillText(timestamp, 30, captureCanvas.height - 30)
+
+      const imageData = captureCanvas.toDataURL('image/png')
+      setCapturedImage(imageData)
+
+      const link = document.createElement('a')
+      link.download = `night-sky-ar-${Date.now()}.png`
+      link.href = imageData
+      link.click()
+
+      toast.success('Photo captured and downloaded!')
+
+      setTimeout(() => setCapturedImage(null), 3000)
+    } catch (err) {
+      console.error('Capture error:', err)
+      toast.error('Failed to capture photo')
+    } finally {
+      setIsCapturing(false)
+    }
+  }
+
   const visibleCount = constellationPositions.filter((p) => p.isVisible).length
 
   return (
@@ -313,6 +380,36 @@ export function ARView({ constellations, onClose, onConstellationClick }: ARView
           onClick={handleCanvasClick}
           className="absolute inset-0 w-full h-full cursor-crosshair"
         />
+
+        <canvas
+          ref={captureCanvasRef}
+          className="hidden"
+        />
+
+        <AnimatePresence>
+          {capturedImage && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              className="absolute inset-0 flex items-center justify-center bg-black/90 z-10 pointer-events-none"
+            >
+              <div className="relative max-w-2xl max-h-[80vh]">
+                <img
+                  src={capturedImage}
+                  alt="Captured AR view"
+                  className="w-full h-full object-contain rounded-lg shadow-2xl border-2 border-accent"
+                />
+                <div className="absolute top-4 left-1/2 -translate-x-1/2">
+                  <Badge className="bg-accent text-accent-foreground">
+                    <Download size={14} />
+                    Photo saved!
+                  </Badge>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <div className="absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/60 to-transparent pointer-events-none">
           <div className="flex items-start justify-between gap-4 pointer-events-auto">
@@ -407,15 +504,27 @@ export function ARView({ constellations, onClose, onConstellationClick }: ARView
                 </div>
               </div>
 
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowInfo(!showInfo)}
-                className="bg-background/20 hover:bg-background/40 text-white border border-white/20"
-              >
-                <Info size={16} />
-                {showInfo ? 'Hide' : 'Show'} Info
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  onClick={capturePhoto}
+                  disabled={isCapturing}
+                  size="lg"
+                  className="bg-accent hover:bg-accent/90 text-accent-foreground shadow-lg shadow-accent/20"
+                >
+                  <Camera size={20} weight="fill" />
+                  {isCapturing ? 'Capturing...' : 'Capture'}
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowInfo(!showInfo)}
+                  className="bg-background/20 hover:bg-background/40 text-white border border-white/20"
+                >
+                  <Info size={16} />
+                  {showInfo ? 'Hide' : 'Show'} Info
+                </Button>
+              </div>
             </div>
           </div>
         </div>

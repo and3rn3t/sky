@@ -69,11 +69,11 @@ This app combines real-time location data, API integration for celestial events,
 - **Success criteria**: Compass accurately reflects device orientation, smoothly updates heading, provides calibration feedback, integrates with constellation finding guides
 
 ### Augmented Reality Constellation View
-- **Functionality**: Overlays constellation patterns and star positions directly on the device camera feed using real-time device orientation and compass data
-- **Purpose**: Allows users to point their device at the sky and instantly identify constellations in their field of view with visual overlays
+- **Functionality**: Overlays constellation patterns and star positions directly on the device camera feed using real-time device orientation and compass data, with photo capture capability to save AR overlays
+- **Purpose**: Allows users to point their device at the sky and instantly identify constellations in their field of view with visual overlays, and capture memorable photos with constellation patterns overlaid
 - **Trigger**: User clicks "Launch AR Sky View" button (available when location detected and constellations are visible)
-- **Progression**: User launches AR → Request camera permission → Access device orientation & compass → Display live camera feed → Calculate visible constellations based on heading/tilt → Render constellation lines and stars on canvas overlay → User pans device to discover constellations → Tap constellation for details
-- **Success criteria**: Camera feed displays smoothly, constellations accurately positioned based on device orientation, smooth overlay rendering, touch interactions reveal constellation information, constellations only shown when in device's field of view
+- **Progression**: User launches AR → Request camera permission → Access device orientation & compass → Display live camera feed → Calculate visible constellations based on heading/tilt → Render constellation lines and stars on canvas overlay → User pans device to discover constellations → Tap constellation for details → Click "Capture" to save photo with AR overlays
+- **Success criteria**: Camera feed displays smoothly, constellations accurately positioned based on device orientation, smooth overlay rendering, touch interactions reveal constellation information, constellations only shown when in device's field of view, photo capture combines video feed and overlay canvas with timestamp watermark and downloads automatically
 
 ## Edge Case Handling
 
@@ -95,6 +95,8 @@ This app combines real-time location data, API integration for celestial events,
 - **AR on Desktop**: Gracefully handle AR requests on desktop browsers without camera, suggest mobile device
 - **No Constellations in View**: Display helpful message when user points device at empty sky region in AR
 - **AR Performance**: Optimize canvas rendering for smooth 30+ FPS on mobile devices, throttle updates if needed
+- **Photo Capture Failure**: Handle canvas capture errors gracefully with toast notification, ensure capture canvas initialized
+- **Low Storage**: Browser may block download if device storage full; show appropriate error message
 
 ## Design Direction
 
@@ -159,7 +161,8 @@ Animations should evoke the slow, graceful movement of celestial bodies - nothin
   - **Star Map**: Interactive canvas-based constellation visualization with clickable stars, constellation lines, and deep sky objects
   - **Constellation Cards**: Cards showing difficulty, hemisphere, and best viewing months
   - **Compass**: Custom animated compass rose with real-time heading display, cardinal directions, smooth rotation animations, and calibration indicators
-  - **AR View**: Full-screen camera feed with transparent canvas overlay for constellation rendering, heads-up display with orientation info, interactive constellation selection by tapping overlays, real-time position tracking with smooth animations
+  - **AR View**: Full-screen camera feed with transparent canvas overlay for constellation rendering, heads-up display with orientation info, interactive constellation selection by tapping overlays, real-time position tracking with smooth animations, photo capture button with success animation
+  - **Photo Capture Overlay**: Animated preview flash and success badge when photo captured, watermark with app branding and timestamp on saved images
 
 - **States**:
   - Buttons: Default has subtle glow, hover adds elevation with box-shadow and slight scale, active state dims glow
@@ -167,6 +170,8 @@ Animations should evoke the slow, graceful movement of celestial bodies - nothin
   - Badges: "Visible Now" pulses gently, upcoming events have static styling, past events are muted
   - Compass: Inactive shows static rose with enable button, active shows smooth rotating cardinal directions with spring physics, calibrating displays overlay with rotation animation, low accuracy shows warning badge
   - AR View: Inactive shows camera feed only, active overlays constellation patterns with glow effects, selected constellation highlights with brighter accent color and thicker lines, info panels slide in/out smoothly
+  - Capture Button: Default state with camera icon, disabled during capture with loading text, success state briefly shows checkmark, hover state with accent glow and scale
+  - Photo Preview: Fades in with scale animation when captured, displays for 3 seconds with success badge, fades out gracefully
 
 - **Icon Selection**:
   - Telescope/MagnifyingGlass for search/explore
@@ -185,7 +190,9 @@ Animations should evoke the slow, graceful movement of celestial bodies - nothin
   - Binoculars for telescope/equipment requirements
   - Book for mythology and educational content
   - Warning for calibration alerts and accuracy warnings
-  - Camera for AR view activation
+  - Camera for AR view activation and photo capture button
+  - Download for successful photo save confirmation
+  - Images for photo gallery or capture preview
   - Crosshair/Target for AR reticle and constellation targeting
   - Circle for AR center point and field of view indicator
 
