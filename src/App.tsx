@@ -16,11 +16,12 @@ import { ViewingSpotDialog } from '@/components/ViewingSpotDialog'
 import { LightPollutionMap } from '@/components/LightPollutionMap'
 import { ConstellationCard } from '@/components/ConstellationCard'
 import { ConstellationDialog } from '@/components/ConstellationDialog'
+import { Compass } from '@/components/Compass'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
-import { Info, MoonStars, MapTrifold, Sparkle, Star } from '@phosphor-icons/react'
+import { Info, MoonStars, MapTrifold, Sparkle, Star, Compass as CompassIcon } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { motion } from 'framer-motion'
 
@@ -34,7 +35,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(false)
   const [isLoadingSpots, setIsLoadingSpots] = useState(false)
   const [activeTab, setActiveTab] = useState<'tonight' | 'week' | 'month'>('tonight')
-  const [mainView, setMainView] = useState<'events' | 'constellations'>('events')
+  const [mainView, setMainView] = useState<'events' | 'constellations' | 'compass'>('events')
   const [locationRequested, setLocationRequested] = useState(false)
   const [showMap, setShowMap] = useState(false)
 
@@ -144,7 +145,7 @@ function App() {
         />
 
         <Tabs value={mainView} onValueChange={(v) => setMainView(v as typeof mainView)} className="mb-6">
-          <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 bg-card/50 backdrop-blur-sm border border-border/50">
+          <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-3 bg-card/50 backdrop-blur-sm border border-border/50">
             <TabsTrigger value="events" className="data-[state=active]:bg-accent/20 data-[state=active]:text-accent">
               <MoonStars size={18} />
               Events
@@ -152,6 +153,10 @@ function App() {
             <TabsTrigger value="constellations" className="data-[state=active]:bg-accent/20 data-[state=active]:text-accent">
               <Star size={18} />
               Constellations
+            </TabsTrigger>
+            <TabsTrigger value="compass" className="data-[state=active]:bg-accent/20 data-[state=active]:text-accent">
+              <CompassIcon size={18} />
+              Compass
             </TabsTrigger>
           </TabsList>
         </Tabs>
@@ -353,6 +358,53 @@ function App() {
                   <p className="text-muted-foreground max-w-md mx-auto">
                     Enable location access to see which constellations are visible from your area.
                   </p>
+                </div>
+              </div>
+            )}
+          </motion.div>
+        )}
+
+        {mainView === 'compass' && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+            className="max-w-2xl mx-auto space-y-6"
+          >
+            <div>
+              <h2 className="text-2xl font-bold mb-2 flex items-center gap-2">
+                <CompassIcon size={28} className="text-accent" />
+                Sky Orientation
+              </h2>
+              <p className="text-muted-foreground mb-4">
+                Use your device's compass to find the direction of celestial objects and constellations in real-time.
+              </p>
+            </div>
+
+            <Compass />
+
+            {visibleConstellations.length > 0 && (
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Constellation Quick Reference</h3>
+                <div className="grid grid-cols-1 gap-3">
+                  {visibleConstellations.slice(0, 6).map((constellation) => (
+                    <div
+                      key={constellation.id}
+                      className="flex items-center justify-between p-3 rounded-lg bg-card/50 border border-border/50 hover:border-accent/30 cursor-pointer transition-all"
+                      onClick={() => setSelectedConstellation(constellation)}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Star size={20} className="text-accent" weight="fill" />
+                        <div>
+                          <p className="font-semibold">{constellation.name}</p>
+                          <p className="text-xs text-muted-foreground">{constellation.abbr}</p>
+                        </div>
+                      </div>
+                      <Button variant="outline" size="sm" className="border-accent/30">
+                        View Map
+                      </Button>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}

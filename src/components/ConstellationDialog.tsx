@@ -9,7 +9,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { StarMap } from '@/components/StarMap'
+import { SkyView } from '@/components/SkyView'
 import { Star as StarIcon, Sparkle, Book, Eye } from '@phosphor-icons/react'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -70,15 +70,11 @@ export function ConstellationDialog({ constellation, open, onOpenChange }: Const
 
         <ScrollArea className="max-h-[calc(90vh-120px)] pr-4">
           <div className="space-y-6">
-            <div className="rounded-lg overflow-hidden border border-border/50 bg-gradient-to-br from-primary/20 to-background">
-              <StarMap
-                constellation={constellation}
-                onStarClick={handleStarClick}
-                onObjectClick={handleObjectClick}
-                showLabels={true}
-                interactive={true}
-              />
-            </div>
+            <SkyView
+              constellation={constellation}
+              onStarClick={handleStarClick}
+              onObjectClick={handleObjectClick}
+            />
 
             <Tabs defaultValue="mythology" className="w-full">
               <TabsList className="grid w-full grid-cols-3 bg-card/50 backdrop-blur-sm border border-border/50">

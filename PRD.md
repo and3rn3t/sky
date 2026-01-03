@@ -61,6 +61,13 @@ This app combines real-time location data, API integration for celestial events,
 - **Progression**: Show constellations visible this month → User selects constellation → Display interactive star map → Click stars and objects for details → Learn mythology and viewing tips
 - **Success criteria**: Star maps are accurate and interactive, clicking reveals detailed information, constellations filtered by hemisphere and season
 
+### Real-time Sky Compass Orientation
+- **Functionality**: Uses device magnetometer and orientation sensors to provide real-time compass heading for accurate star finding and sky navigation
+- **Purpose**: Helps users orient themselves to find specific celestial objects and constellations by showing which direction they're facing
+- **Trigger**: User switches to "Compass" tab or opens compass view within constellation details
+- **Progression**: User requests compass access → Device permission granted → Real-time heading displayed → User points device at sky → Compass shows cardinal direction and degree heading → User references constellation directions
+- **Success criteria**: Compass accurately reflects device orientation, smoothly updates heading, provides calibration feedback, integrates with constellation finding guides
+
 ## Edge Case Handling
 
 - **Location Permission Denied**: Show manual location entry option with city search or lat/lng input
@@ -73,6 +80,10 @@ This app combines real-time location data, API integration for celestial events,
 - **API Rate Limits**: NASA DEMO_KEY has rate limits; handle gracefully with cached data and retry logic
 - **No Visible Constellations**: Show message when no constellations match current month/location filters
 - **Star Map Interaction**: Ensure touch targets are large enough on mobile for clicking individual stars and objects
+- **Compass Not Supported**: Show helpful message when device doesn't have orientation sensors or is desktop browser
+- **Compass Permission Denied**: Provide clear instructions on enabling device orientation in browser settings
+- **Compass Calibration**: Display calibration prompt when device motion suggests inaccurate readings
+- **Low Compass Accuracy**: Warn users when compass accuracy is low (iOS-specific feature)
 
 ## Design Direction
 
@@ -135,16 +146,19 @@ Animations should evoke the slow, graceful movement of celestial bodies - nothin
   - **Viewing Spot Cards**: Compact cards with ratings, distance, and light pollution information
   - **Star Map**: Interactive canvas-based constellation visualization with clickable stars, constellation lines, and deep sky objects
   - **Constellation Cards**: Cards showing difficulty, hemisphere, and best viewing months
+  - **Compass**: Custom animated compass rose with real-time heading display, cardinal directions, smooth rotation animations, and calibration indicators
 
 - **States**:
   - Buttons: Default has subtle glow, hover adds elevation with box-shadow and slight scale, active state dims glow
   - Event Cards: Default has soft border, hover elevates with stronger glow and scale transform, selected/active has bright accent border
   - Badges: "Visible Now" pulses gently, upcoming events have static styling, past events are muted
+  - Compass: Inactive shows static rose with enable button, active shows smooth rotating cardinal directions with spring physics, calibrating displays overlay with rotation animation, low accuracy shows warning badge
 
 - **Icon Selection**:
   - Telescope/MagnifyingGlass for search/explore
   - MapPin for location and viewing spots
   - MapTrifold for light pollution map feature
+  - Compass for device orientation and sky navigation
   - Clock for timing information
   - Star for ratings, highlighting special events, and constellations
   - CalendarBlank for upcoming events
@@ -156,6 +170,7 @@ Animations should evoke the slow, graceful movement of celestial bodies - nothin
   - Eye for visibility and observation
   - Binoculars for telescope/equipment requirements
   - Book for mythology and educational content
+  - Warning for calibration alerts and accuracy warnings
 
 - **Spacing**:
   - Container padding: p-6 on desktop, p-4 on mobile
