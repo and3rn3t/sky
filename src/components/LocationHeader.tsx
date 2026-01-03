@@ -21,6 +21,7 @@ export function LocationHeader({ location, onRefresh, isLoading }: LocationHeade
         <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
           Night Sky Tonight
         </h1>
+        <p className="text-xs text-muted-foreground/80">Powered by NASA & astronomical data</p>
         {location ? (
           <div className="flex items-center gap-2 text-muted-foreground">
             <MapPin size={16} weight="fill" />

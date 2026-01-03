@@ -20,18 +20,18 @@ This app combines real-time location data, API integration for celestial events,
 - **Success criteria**: Location accurately captured and displayed; events reflect local visibility conditions
 
 ### Tonight's Sky Overview
-- **Functionality**: Displays celestial events visible tonight at user's location with visibility scores and timing
+- **Functionality**: Displays celestial events visible tonight at user's location with visibility scores and timing using NASA API data
 - **Purpose**: Answers "What should I look for in the sky tonight?"
 - **Trigger**: Automatic on app load with valid location
-- **Progression**: Location detected → Fetch current day events → Calculate visibility windows → Display prioritized list with best viewing times
-- **Success criteria**: Events shown are actually visible from user's location tonight with accurate timing
+- **Progression**: Location detected → Fetch NASA DONKI solar events & calculate astronomical events → Calculate visibility windows → Display prioritized list with best viewing times
+- **Success criteria**: Events shown are actually visible from user's location tonight with accurate timing based on real astronomical data
 
 ### Upcoming Events Calendar
-- **Functionality**: Shows significant celestial events in the next 7-30 days with countdowns
+- **Functionality**: Shows significant celestial events in the next 7-30 days with countdowns, including NASA solar events, meteor showers, moon phases, and visible planets
 - **Purpose**: Helps users plan ahead for major astronomical phenomena
 - **Trigger**: Automatic on app load; refreshable
-- **Progression**: Fetch upcoming events → Filter by location visibility → Sort by significance and proximity → Display with dates and descriptions
-- **Success criteria**: Events are chronologically ordered, properly dated, and include preparation tips
+- **Progression**: Fetch NASA API events & calculate astronomical phenomena → Filter by location visibility → Sort by significance and proximity → Display with dates and descriptions
+- **Success criteria**: Events are chronologically ordered, properly dated, include real NASA data, and provide preparation tips
 
 ### Event Detail & Education
 - **Functionality**: Detailed view for each celestial event with explanation, science, viewing tips, and optimal conditions
@@ -59,10 +59,11 @@ This app combines real-time location data, API integration for celestial events,
 - **Location Permission Denied**: Show manual location entry option with city search or lat/lng input
 - **No Events Tonight**: Display encouraging message with next upcoming event and general stargazing tips
 - **Poor Viewing Conditions**: Show weather/light pollution warnings when relevant
-- **API Unavailable**: Graceful fallback with cached data or educational content about general celestial phenomena
+- **NASA API Unavailable**: Graceful fallback with calculated astronomical events (moon phases, planets, meteor showers) when NASA DONKI API is down
 - **Southern Hemisphere Users**: Ensure event data and descriptions work correctly for all latitudes
 - **Urban Light Pollution**: Adjust recommendations based on typical urban viewing limitations; suggest darker viewing spots
 - **No Viewing Spots Found**: Show fallback suggestions or general advice about finding dark sky locations
+- **API Rate Limits**: NASA DEMO_KEY has rate limits; handle gracefully with cached data and retry logic
 
 ## Design Direction
 

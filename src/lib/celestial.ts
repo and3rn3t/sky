@@ -1,9 +1,5 @@
 import { CelestialEvent, UserLocation } from './types'
-
-declare const spark: {
-  llmPrompt: (strings: TemplateStringsArray, ...values: any[]) => string
-  llm: (prompt: string, modelName?: string, jsonMode?: boolean) => Promise<string>
-}
+import { fetchNASAEvents } from './nasaApi'
 
 export async function getUserLocation(): Promise<UserLocation | null> {
   return new Promise((resolve) => {
@@ -40,39 +36,14 @@ export async function getUserLocation(): Promise<UserLocation | null> {
 }
 
 export async function generateCelestialEvents(location: UserLocation): Promise<CelestialEvent[]> {
-  const today = new Date()
-  const prompt = spark.llmPrompt`You are an astronomy expert. Generate a list of celestial events and objects visible from latitude ${location.latitude}, longitude ${location.longitude} for the next 30 days starting from ${today.toISOString()}.
-
-Include a mix of:
-- Meteor showers (with peak dates)
-- Visible planets (which planets are visible and when)
-- Moon phases (full moon, new moon, etc.)
-- Any special conjunctions or alignments
-- Possibility of aurora (if latitude is suitable)
-- Any comets currently visible
-
-For EACH event, provide:
-- A unique id (use a simple slug format)
-- name (the name of the event/object)
-- type (one of: meteor_shower, planet, aurora, eclipse, conjunction, moon_phase, comet)
-- date (ISO format date string for the event)
-- peakTime (optional, time of day for best viewing in 24h format like "22:00")
-- description (1-2 sentences about what this event is)
-- educationalContent (2-3 paragraphs of educational information about this type of celestial object/event - make it engaging and informative)
-- viewingTips (practical advice for viewing this specific event - equipment needed, where to look, etc.)
-- bestViewingTime (human readable time like "After midnight" or "Evening, 9 PM - 2 AM")
-- visibilityScore (0-100, how visible this will be from this location considering light pollution, atmospheric conditions, etc.)
-- isVisibleNow (boolean, is it visible right now based on current time being ${today.toISOString()})
-- nextVisibleIn (optional string like "in 2 hours" or "in 3 days" if not visible now)
-- rarity (one of: common, uncommon, rare)
-- requiredEquipment (optional, e.g., "Naked eye", "Binoculars recommended", "Telescope required")
-
-Return as JSON with a single property "events" containing an array of exactly 12-15 diverse events.`
-
   try {
-    const result = await spark.llm(prompt, 'gpt-4o', true)
-    const parsed = JSON.parse(result)
-    return parsed.events || []
+    const events = await fetchNASAEvents(location)
+    
+    if (events.length === 0) {
+      return getFallbackEvents()
+    }
+    
+    return events
   } catch (error) {
     console.error('Error generating celestial events:', error)
     return getFallbackEvents()
